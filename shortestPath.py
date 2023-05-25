@@ -3,8 +3,6 @@ from curses import wrapper
 import queue
 import time
 
-# Breadth-first search algorithm
-# Queue
 
 maze = [
     ["#", "#", "#", "#", "#", "#", "O", "#", "#"],
@@ -19,10 +17,13 @@ maze = [
 ]
 
 
-def find_path(maze, stdscr):
+def find_path_bfs(maze, stdscr):
     start = 'O'
     end = 'X'
     start_position = find_start(maze, start)
+
+    # Breadth-first search algorithm
+    # Queue
 
     q = queue.Queue()
     q.put((start_position, [start_position]))
@@ -52,6 +53,45 @@ def find_path(maze, stdscr):
 
             new_path = path + [neighbour]
             q.put((neighbour, new_path))
+            visited.add(neighbour)
+
+
+def find_path_dfs(maze, stdscr):
+    start = 'O'
+    end = 'X'
+    start_position = find_start(maze, start)
+
+    # Use a stack instead of queue, where we append and pop elements from its end
+    # DFS visits the most recently discovered node that hasn't been fully explored
+
+    stack = []
+    stack.append((start_position, [start_position]))
+
+    visited = set()
+
+    while stack:
+        current_position, path = stack.pop()
+        row, col = current_position
+
+        stdscr.clear()
+        print_maze(maze, stdscr, path)
+        time.sleep(0.2)
+        stdscr.refresh()
+
+        if maze[row][col] == end:
+            return path
+
+        neighbours = find_neighbours(maze, row, col)
+        for neighbour in neighbours:
+            if neighbour in visited:
+                continue
+
+            r, c = neighbour
+            if maze[r][c] == '#':
+                continue
+
+            new_path = path + [neighbour]
+            stack.append((neighbour, new_path))
             visited.add(neighbour)
 
 
@@ -91,9 +131,25 @@ def print_maze(maze, stdscr, path=[]):
 def main(stdscr):
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+    while True:
+        stdscr.addstr(0, 0, "Select an algorithm: \n")
+        stdscr.addstr(1, 0, "1: Breadth-First Search\n")
+        stdscr.addstr(2, 0, "2: Depth-First Search\n")
+        stdscr.addstr(3, 0, "q: Quit\n")
+        stdscr.refresh()
+        choice = stdscr.getkey()
+        if choice == '1':
+            find_path_bfs(maze, stdscr)
+        elif choice == '2':
+            find_path_dfs(maze, stdscr)
+        elif choice.lower() == 'q':
+            break
+        else:
+            stdscr.addstr("Invalid option. Please try again.\n")
+        stdscr.addstr(4, 0, "Press any key to continue...\n")
 
-    find_path(maze, stdscr)
-    stdscr.getch()
+        stdscr.refresh()
+        stdscr.getch()
 
 
 wrapper(main)
