@@ -40,7 +40,7 @@ def find_path_bfs(maze, stdscr):
         stdscr.refresh()
 
         if maze[row][col] == end:
-            return path
+            return path, len(path)
 
         neighbours = find_neighbours(maze, row, col)
         for neighbour in neighbours:
@@ -79,7 +79,7 @@ def find_path_dfs(maze, stdscr):
         stdscr.refresh()
 
         if maze[row][col] == end:
-            return path
+            return path, len(path)
 
         neighbours = find_neighbours(maze, row, col)
         for neighbour in neighbours:
@@ -137,18 +137,27 @@ def main(stdscr):
         stdscr.addstr(2, 0, "2: Depth-First Search\n")
         stdscr.addstr(3, 0, "q: Quit\n")
         stdscr.refresh()
+        stdscr.clrtobot()
         choice = stdscr.getkey()
         if choice == '1':
-            find_path_bfs(maze, stdscr)
+            start_time = time.time()
+            path, path_length = find_path_bfs(maze, stdscr)
+            end_time = time.time()
+            stdscr.addstr(4, 0, f"BFS took {round(end_time - start_time, 3)} seconds\n")
+            stdscr.addstr(5, 0, f"BFS took {path_length} steps\n")
         elif choice == '2':
-            find_path_dfs(maze, stdscr)
+            start_time = time.time()
+            path, path_length = find_path_dfs(maze, stdscr)
+            end_time = time.time()
+            stdscr.addstr(4, 0, f"DFS took {round(end_time - start_time, 3)} seconds\n")
+            stdscr.addstr(5, 0, f"BFS took {path_length} steps\n")
         elif choice.lower() == 'q':
             break
         else:
             stdscr.addstr("Invalid option. Please try again.\n")
-        stdscr.addstr(4, 0, "Press any key to continue...\n")
+        stdscr.addstr(6, 0, "Press any key to continue...\n")
 
-        stdscr.refresh()
+        # stdscr.refresh()
         stdscr.getch()
 
 
