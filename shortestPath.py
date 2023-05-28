@@ -95,6 +95,45 @@ def find_path_dfs(maze, stdscr):
             visited.add(neighbour)
 
 
+def find_dijkstra(maze, stdscr):
+    start = 'O'
+    end = 'X'
+    start_position = find_start(maze, start)
+
+    # Use a priority queue with costs, where we pop elements with the smallest cost
+    q = queue.PriorityQueue()
+    q.put((0, start_position, [start_position]))
+
+    visited = set()
+
+    while not q.empty():
+        cost, current_position, path = q.get()
+        row, col = current_position
+
+        stdscr.clear()
+        print_maze(maze, stdscr, path)
+        time.sleep(0.2)
+        stdscr.refresh()
+
+        if maze[row][col] == end:
+            return path, len(path)
+
+        neighbours = find_neighbours(maze, row, col)
+        for neighbour in neighbours:
+            if neighbour in visited:
+                continue
+
+            r, c = neighbour
+            if maze[r][c] == '#':
+                continue
+
+            new_path = path + [neighbour]
+            new_cost = cost + 1  # Here, the cost is 1 for each step, change it as per your requirements
+            q.put((new_cost, neighbour, new_path))
+            visited.add(neighbour)
+
+
+
 def find_neighbours(maze, row, col):
     neighbours = []
     if row > 0:  # UP
@@ -132,10 +171,12 @@ def main(stdscr):
     curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
     while True:
+        start = 0
         stdscr.addstr(0, 0, "Select an algorithm: \n")
         stdscr.addstr(1, 0, "1: Breadth-First Search\n")
         stdscr.addstr(2, 0, "2: Depth-First Search\n")
-        stdscr.addstr(3, 0, "q: Quit\n")
+        stdscr.addstr(3, 0, "3: Dijkstra's")
+        stdscr.addstr(4, 0, "q: Quit\n")
         stdscr.refresh()
         stdscr.clrtobot()
         choice = stdscr.getkey()
@@ -143,19 +184,25 @@ def main(stdscr):
             start_time = time.time()
             path, path_length = find_path_bfs(maze, stdscr)
             end_time = time.time()
-            stdscr.addstr(4, 0, f"BFS took {round(end_time - start_time, 3)} seconds\n")
-            stdscr.addstr(5, 0, f"BFS took {path_length} steps\n")
+            stdscr.addstr(5, 0, f"BFS took {round(end_time - start_time, 3)} seconds\n")
+            stdscr.addstr(6, 0, f"BFS took {path_length} steps\n")
         elif choice == '2':
             start_time = time.time()
             path, path_length = find_path_dfs(maze, stdscr)
             end_time = time.time()
-            stdscr.addstr(4, 0, f"DFS took {round(end_time - start_time, 3)} seconds\n")
-            stdscr.addstr(5, 0, f"BFS took {path_length} steps\n")
+            stdscr.addstr(5, 0, f"DFS took {round(end_time - start_time, 3)} seconds\n")
+            stdscr.addstr(6, 0, f"BFS took {path_length} steps\n")
+        elif choice == '3':
+            start_time = time.time()
+            path, path_length = find_dijkstra(maze, stdscr)
+            end_time = time.time()
+            stdscr.addstr(5, 0, f"Dijkstra's took {round(end_time - start_time, 3)} seconds\n")
+            stdscr.addstr(6, 0, f"Dijkstra's took {path_length} steps\n")
         elif choice.lower() == 'q':
             break
         else:
             stdscr.addstr("Invalid option. Please try again.\n")
-        stdscr.addstr(6, 0, "Press any key to continue...\n")
+        stdscr.addstr(7, 0, "Press any key to continue...\n")
 
         # stdscr.refresh()
         stdscr.getch()
